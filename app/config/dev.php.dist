@@ -1,0 +1,8 @@
+<?php
+
+$app['facebook.redirect'] = 'https://www.facebook.com/connect/login_success.html';
+
+$app['tinder.app.id'] = '464891386855067';
+$app['tinder.api.url'] = 'https://api.gotinder.com/';
+
+$app['application.url'] = 'http://tinder.dev'; // change it for your own app url
