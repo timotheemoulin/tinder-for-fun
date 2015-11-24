@@ -1,0 +1,40 @@
+<h2><a href="{{ path('tinder_user', {id: user._id}) }}">{{ user.name }} ({{ user.birth_date|age }})</a></h2>
+
+{% if actions is defined and actions %}
+    <ul id="actions">
+        <li><a href="{{ path('tinder_like', {id: user._id}) }}">Like</a></li>
+        <li><a href="{{ path('tinder_nope', {id: user._id}) }}">Nope</a></li>
+    </ul>
+{% endif %}
+
+<h4>Bio</h4>
+<p>{{ user.bio|escape }}</p>
+<p>{{ user.distance_mi|escape }}km</p>
+
+{% if user.jobs is not empty %}
+    <h4>Jobs</h4>
+    <ul id="jobs">
+        {% for job in user.jobs %}
+            <li>
+                {% if job.title.name is defined %}{{ job.title.name }}{% endif %}
+                {% if job.title.name is defined and job.company.name is defined %}at{% endif %}
+                {% if job.company.name is defined %}{{ job.company.name }}{% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% if user.schools is not empty %}
+    <h4>Schools</h4>
+    <ul id="schools">
+        {% for school in user.schools %}
+            <li>{{ school.name }}</li>
+        {% endfor %}
+    </ul>
+    <h4>Pics</h4>
+    <ul id="pics">
+        {% for photo in user.photos %}
+            <li><a href="{{ photo.url }}"><img max-width="100" src="{{ photo.url }}"/></a></li>
+        {% endfor %}
+    </ul>
+{% endif %}

@@ -4,9 +4,9 @@
 
     <h1>Matches</h1>
     <ul id="matches">
-        {% for match in matches %}
+        {% for user in users %}
             <li>
-                <a href="{{ path('tinder_user', {id: match._id}) }}">{{ match.name }} ({{ match.birth_date|age }})</a><br />
+                <a href="{{ path('tinder_user', {id: user._id}) }}">{{ user.name }} ({{ user.birth_date|age }})</a><br />
             </li>
         {% endfor %}
     </ul>

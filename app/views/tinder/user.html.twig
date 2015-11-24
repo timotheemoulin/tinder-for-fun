@@ -2,42 +2,8 @@
 
 {% block content %}
 
-    <h1>{{ user.name }}</h1>
-    <h4>Bio</h4>
-    <p>{{ user.bio|escape }}</p>
-    <p>{{ user.distance_mi|escape }}km</p>
-    <h4>Jobs</h4>
-    <ul id="jobs">
-        {% for job in user.jobs %}
-            <li>
-                {% if job.title.name is defined %}{{ job.title.name }}{% endif %}
-                {% if job.title.name is defined and job.company.name is defined %}at{% endif %}
-                {% if job.company.name is defined %}{{ job.company.name }}{% endif %}
-            </li>
-        {% endfor %}
-    </ul>
-    <h4>Schools</h4>
-    <ul id="schools">
-        {% for school in user.schools %}
-            <li>{{ school.name }}</li>
-        {% endfor %}
-    </ul>
-    <h4>Pics</h4>
-    <ul id="pics">
-        {% for photo in user.photos %}
-            <li><a href="{{ photo.url }}"><img max-width="100" src="{{ photo.url }}"/></a></li>
-        {% endfor %}
-    </ul>
-
-    <style>
-        #pics li {
-            display: inline;
-            list-style-type: none;
-        }
-
-        #pics img {
-            max-width: 100px;
-        }
-    </style>
+    {{ dump(messages) }}
+    {% include 'tinder/_messages.html.twig' with {messages: messages} %}
+    {% include 'tinder/_user.html.twig' with {user: user} %}
 
 {% endblock %}

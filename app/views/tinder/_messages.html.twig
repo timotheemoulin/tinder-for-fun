@@ -1,0 +1,8 @@
+<h2>Messages</h2>
+<ul id="messages">
+    {% for message in messages %}
+        <li>{{ dump(message) }}</li>
+    {% else %}
+        No message yet. Say something nice about your match.
+    {% endfor %}
+</ul>

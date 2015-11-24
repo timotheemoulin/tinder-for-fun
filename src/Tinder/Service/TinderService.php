@@ -47,19 +47,45 @@ class TinderService extends SessionService
 
     public function getUser($matchId)
     {
-        $id = str_replace($this->getSession('tinder_user_id'), '', $matchId);
+        $id = $this->extractMatchId($matchId);
 
-        return $this->callApi("user/{$id}", true, array(), false);
+        return $this->callApi("user/{$id}", true, array(), false)->results;
     }
 
     public function getUpdates()
     {
-        $result = $this->callApi('updates', true);
+        // just to be sure to get all the updates
+        $params = array('last_activity_date' => '');
+        $result = $this->callApi('updates', true, $params, true, false)->matches;
 
         return $result;
     }
 
-    public function callApi($method, $private = true, $params = array(), $post = true)
+    public function getRecs()
+    {
+        $result = $this->callApi('recs', true, array(), true, false)->results;
+
+        return $result;
+    }
+
+    /**
+     * @param $id
+     * @return true if it's a match
+     * @return false if it's not a match
+     */
+    public function likeUser($id)
+    {
+        $result = $this->callApi("like/{$id}", true, array(), true, false);
+
+        return $result->match;
+    }
+
+    public function nopeUser($id)
+    {
+        return $this->callApi("like/{$id}", true, array(), true, false);
+    }
+
+    public function callApi($method, $private = true, $params = array(), $post = true, $cached = true)
     {
         $url = $this->app['tinder.api.url'].$method;
 
@@ -82,13 +108,23 @@ class TinderService extends SessionService
         $curl = "curl -v {$verb} '{$url}' -H 'app-version: 123' -H 'platform: ios' -H 'User-agent: Tinder/4.0.9 (iPhone; iOS 8.0.2; Scale/2.00)' -H 'content-type: application/json' {$tokenHeader} {$data}";
 
         $call = md5(serialize($curl));
-        if ($this->getSession("api.{$call}")) {
+        if ($cached && $this->getSession("api.{$call}")) {
             return $this->getSession("api.{$call}");
         }
 
         $result = exec($curl);
 
         if ($result = json_decode($result)) {
+
+            // check the response before caching it
+            if (isset($result->message)) {
+                $this->app->abort(400, sprintf('Something unexpected happened while contacting Tinder API. "%s"', $result->message));
+            }
+
+            if (isset($result->error)) {
+                $this->app->abort(400, sprintf('Something bad happened while contacting Tinder API. "%s"', $result->message));
+            }
+
             if (isset($result->token)) {
                 $this->saveSession('tinder_token', $result->token);
                 $this->saveSession('tinder_user_id', $result->user->_id);
@@ -101,6 +137,11 @@ class TinderService extends SessionService
         }
 
         return false;
+    }
+
+    public function extractMatchId($matchId)
+    {
+        return str_replace($this->getSession('tinder_user_id'), '', $matchId);
     }
 
 }

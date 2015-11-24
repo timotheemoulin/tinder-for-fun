@@ -11,16 +11,18 @@ class TinderController
 
     public function indexAction(Application $app, Request $request)
     {
-        return $app['twig']->render('index.html.twig');
+        return $this->loginAction($app, $request);
     }
 
     public function loginAction(Application $app, Request $request, $callback = false)
     {
         if ($callback) {
-            $app['service.facebook']->saveSession('facebook_access_token', $_GET['facebook_user_token']);
+            $app['service.tinder']->saveSession('facebook_access_token', $_GET['facebook_user_token']);
+
             return $app->redirect($app['url_generator']->generate('tinder_me'));
         } else {
             $oauth = $app['service.facebook']->login();
+
             return $app['twig']->render('facebook/oauth.html.twig', array('oauth' => $oauth));
         }
 
@@ -48,32 +50,80 @@ class TinderController
 
     public function userAction(Application $app, Request $request)
     {
-        $user = $app['service.tinder']->getUser($request->attributes->get('id'));
+        $id = $request->attributes->get('id');
+        $user = $app['service.tinder']->getUser($id);
+        $updates = $app['service.tinder']->getUpdates();
 
+        $messages = array();
+
+        foreach ($updates as $update) {
+            $matchId = $app['service.tinder']->extractMatchId($update->_id);
+
+            if ($matchId == $id) {
+                $messages = $update->messages;
+                break;
+            }
+        }
 
         return $app['twig']->render(
           'tinder/user.html.twig',
           array(
-            'user' => $user->results,
+            'user' => $user,
+            'messages' => $messages,
           )
         );
+    }
+
+    public function recsAction(Application $app, Request $request)
+    {
+        $recs = $app['service.tinder']->getRecs();
+
+//        $users = array();
+//
+//        foreach ($recs as $user) {
+//            $users[] = $app['service.tinder']->getUser($user->_id);
+//        }
+
+
+        return $app['twig']->render(
+          'tinder/recs.html.twig',
+          array(
+            'recs' => $recs,
+          )
+        );
+    }
+
+    public function likeAction(Application $app, Request $request)
+    {
+        $id = $request->attributes->get('id');
+        $result = $app['service.tinder']->likeUser($id);
+
+        return $result;
+    }
+
+    public function nopeAction(Application $app, Request $request)
+    {
+        $id = $request->attributes->get('id');
+        $result = $app['service.tinder']->nopeUser($id);
+
+        return $result;
     }
 
     public function updatesAction(Application $app, Request $request)
     {
         $updates = $app['service.tinder']->getUpdates();
 
-        $matches = array();
+        $users = array();
 
-        foreach ($updates->matches as $match) {
-            $matches[] = $app['service.tinder']->getUser($match->_id);
+        foreach ($updates as $match) {
+            $users[] = $app['service.tinder']->getUser($match->_id);
         }
 
 
         return $app['twig']->render(
           'tinder/updates.html.twig',
           array(
-            'matches' => $matches->results,
+            'users' => $users,
           )
         );
     }

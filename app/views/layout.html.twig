@@ -12,8 +12,29 @@
     <meta name="description" content="Tinder API testing app">
     <meta name="author" content="Timothee Moulin hello@timothee-moulin.me">
     <title>Tinder API</title>
+
+    <style>
+        #pics li {
+            display: inline;
+            list-style-type: none;
+        }
+
+        #pics img {
+            max-width: 100px;
+        }
+    </style>
 </head>
 <body>
+<ul id="menu">
+    {% if(app['service.tinder'].getSession('tinder_token')) %}
+        <li><a href="{{ path('facebook_logout') }}">Logout</a></li>
+        <li><a href="{{ path('tinder_me') }}">Me</a></li>
+        <li><a href="{{ path('tinder_updates') }}">Matches</a></li>
+        <li><a href="{{ path('tinder_recs') }}">Recs</a></li>
+    {% else %}
+        <li><a href="{{ path('facebook_login') }}">Login</a></li>
+    {% endif %}
+</ul>
 {% set messages = app.session.getFlashBag.get('message') %}
 {% if messages %}
     <section>
@@ -29,7 +50,7 @@
 {% block content %}
 {% endblock %}
 <footer>
-    <hr />
+    <hr/>
     Tinder API testing app
 </footer>
 </body>

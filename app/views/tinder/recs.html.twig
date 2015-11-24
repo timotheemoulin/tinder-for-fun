@@ -1,0 +1,11 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+
+    <h1>Recommendations</h1>
+
+    {% for user in recs %}
+        {% include 'tinder/_user.html.twig' with {user: user, actions: true} %}
+    {% endfor %}
+
+{% endblock %}
